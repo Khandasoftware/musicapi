@@ -17,7 +17,7 @@ use App\Http\Controllers\GenreController;
 */
 
 // API versioning prefix
-Route::prefix('api/v1')->group(function () {
+Route::prefix('v1')->group(function () {
     // Authentication route (if needed)
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         return $request->user();
@@ -26,4 +26,7 @@ Route::prefix('api/v1')->group(function () {
     // Songs and Genres resources
     Route::resource('songs', SongController::class);
     Route::resource('genres', GenreController::class);
+    Route::get('/songs/by-genre/{genre}', 'App\Http\Controllers\SongController@getByGenre');
+    Route::get('{any}', 'App\Http\Controllers\ApiController@index')->where('any', '.*');
+
 });
