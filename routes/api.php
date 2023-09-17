@@ -2,8 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ApiController;
 use App\Http\Controllers\SongController;
 use App\Http\Controllers\GenreController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,15 +21,24 @@ use App\Http\Controllers\GenreController;
 
 // API versioning prefix
 Route::prefix('v1')->group(function () {
-    // Authentication route (if needed)
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        return $request->user();
+    // Authentication routes (Laravel Sanctum)
+    Route::middleware('auth:sanctum')->group(function () {
+        // Get authenticated user information
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        });
+        //Protected resource routes
+        Route::apiResource('songs', SongController::class);
+        Route::apiResource('genres', GenreController::class);
     });
 
-    // Songs and Genres resources
-    Route::resource('songs', SongController::class);
-    Route::resource('genres', GenreController::class);
-    Route::get('/songs/by-genre/{genre}', 'App\Http\Controllers\SongController@getByGenre');
-    Route::get('{any}', 'App\Http\Controllers\ApiController@index')->where('any', '.*');
+    // Public routes
+    Route::post('/register', [RegisterController::class,'register'] ); // User registration
+    Route::post('/login', [LoginController::class,'login'] ); // User login
+    Route::get('/songs/by-genre/{genre}', [SongController::class, 'getByGenre']);
+
+    // Catch-all route for handling unspecified routes
+    Route::any('{any}', [ ApiController::class, 'index' ] )->where('any', '.*');
 
 });
+
