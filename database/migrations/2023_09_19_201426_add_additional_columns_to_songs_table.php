@@ -11,14 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('songs', function (Blueprint $table) {
-            $table->id();
-            $table->string('title');
-            $table->string('description');
-            $table->string('artist');
-            $table->string('mp3');
-            $table->string('cover_image');
-            
+        Schema::table('songs', function (Blueprint $table) {
+            //
+            $table->string('price');
         });
     }
 
@@ -27,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('songs');
+        Schema::table('songs', function (Blueprint $table) {
+            //
+            $table->dropColumn(['price']);
+        });
     }
 };

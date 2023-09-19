@@ -38,7 +38,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/songs/by-genre/{genre}', [SongController::class, 'getByGenre']);
 
     // Catch-all route for handling unspecified routes
-    Route::any('{any}', [ ApiController::class, 'index' ] )->where('any', '.*');
+   // Route::any('{any}', [ ApiController::class, 'index' ] )->where('any', '.*');
+
+    Route::post('/purchase/{song}', [SongController::class,'purchase'] );
 
 });
 

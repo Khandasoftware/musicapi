@@ -9,10 +9,15 @@ class Song extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'artist', 'mp3', 'cover_image'];
+    protected $fillable = ['title', 'description', 'artist', 'mp3', 'cover_image','price'];
 
     public function genres()
     {
         return $this->belongsToMany(Genre::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

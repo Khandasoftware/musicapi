@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Stripe\Stripe;
 use App\Models\Song;
+use Stripe\PaymentIntent;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Services\SongService;
+use App\Http\Controllers\Controller;
 
 class SongController extends Controller
 {
@@ -67,6 +69,23 @@ class SongController extends Controller
     
         return response()->json(['songs' => $songs]);
     }
-    
 
+
+
+    public function purchase(Request $request, Song $song)
+    {
+
+        Stripe::setApiKey('sk_test_51NrnCwFBkZkLD0wZ9RVAcjR9kMa4Ommvp7ejNlWaShFPG3BRpj9h2Z4KEYL9vXRKLbAPHFdcjpl4nlhRLbhdKz9K00rDRDZ9nR');
+
+        // Create a PaymentIntent
+        $paymentIntent = PaymentIntent::create([
+            'amount' => intval($song->price) * 100, // Amount in cents
+            'currency' => 'usd', // Change to your desired currency
+            'description' => $song->title,
+            'payment_method_types' => ['card'],
+        ]);
+
+        return response()->json(['client_secret' => $paymentIntent->client_secret]);
+    }
+    
 }

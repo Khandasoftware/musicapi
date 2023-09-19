@@ -30,5 +30,9 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'stripe' => [
+        'secret' => env('sk_test_51NrnCwFBkZkLD0wZ9RVAcjR9kMa4Ommvp7ejNlWaShFPG3BRpj9h2Z4KEYL9vXRKLbAPHFdcjpl4nlhRLbhdKz9K00rDRDZ9nR'), // Use your actual Stripe Secret Key
+    ],
+    
 
 ];
