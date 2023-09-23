@@ -32,6 +32,9 @@ Route::prefix('v1')->group(function () {
         //Protected resource routes
         Route::apiResource('songs', SongController::class);
         Route::apiResource('genres', GenreController::class);
+
+        Route::post('/purchase/{song}', [SongController::class,'purchase'] );
+        Route::post('/confirm', [SongController::class,'confirmPayment'] );
     });
 
     // Public routes
@@ -42,10 +45,6 @@ Route::prefix('v1')->group(function () {
     // Catch-all route for handling unspecified routes
    // Route::any('{any}', [ ApiController::class, 'index' ] )->where('any', '.*');
 
-    Route::post('/purchase/{song}', [SongController::class,'purchase'] );
-    Route::post('/stripe/webhook/payment-intent-succeeded', [StripeWebhookController::class, 'handlePaymentSuccess'] );
-    Route::post('/stripe/webhook/charge-succeeded', [StripeWebhookController::class, 'handleChargeSucceeded']);
-    Route::post('/stripe/webhook/subscription-created', [StripeWebhookController::class, 'handleSubscriptionCreated']);
     Route::get('/logs', [LogController::class, 'show'] );
 });
 

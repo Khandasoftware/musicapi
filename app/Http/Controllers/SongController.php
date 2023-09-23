@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Stripe\Stripe;
 use App\Models\Song;
+use App\Models\Order;
 use Stripe\PaymentIntent;
 use Illuminate\Http\Request;
 use App\Services\SongService;
@@ -85,28 +86,43 @@ class SongController extends Controller
             'payment_method_types' => ['card'],
         ]);
 
-        return response()->json(['client_secret' => $paymentIntent->client_secret]);
+        $order = new Order();
+        $order->user_id = auth()->id();
+        $order->product_id = $song->id; // Assuming you have the product object
+        //$order->quantity = $quantity; // The quantity of the product
+        $order->stripe_payment_intent_id = $paymentIntent->id;
+        $order->status = 'pending'; // Initial status
+        $order->price = intval($song->price); // Set the price based on the product's price
+        $order->save();
+
+        return response()->json([
+            'client_secret' => $paymentIntent->client_secret,
+            'payment_id' => $paymentIntent->id
+        ]);
     }
 
 
     public function confirmPayment(Request $request)
     {
-        // ... Payment confirmation logic ...
-
-        // Create a new order record
-        $order = Order::create([
-            'user_id' => auth()->user()->id, // Assuming user is authenticated
-            'payment_intent_id' => $paymentIntentId, // Replace with actual payment intent ID
-            'total_price' => $totalPrice, // Replace with actual total price
-        ]);
-
-        // Update order status as needed
-        $order->update(['status' => 'paid']); // Example: Update order status to 'paid'
-
-        // Handle other post-payment processing...
-
-        // Return a success response
-        return response()->json(['message' => 'Payment confirmed successfully']);
+        $paymentIntentId = $request->input('stripe_payment_intent_id');
+    
+        // Retrieve the PaymentIntent from Stripe
+        $paymentIntent = PaymentIntent::retrieve($paymentIntentId);
+    
+        // Check if the payment was successful
+        if ($paymentIntent->status === 'succeeded') {
+            // Update the payment record status in your database
+            $payment = Order::where('stripe_payment_intent_id', $paymentIntent->id)->first();
+            $payment->status = 'completed';
+            $payment->save();
+    
+            // Perform any additional actions (e.g., send confirmation email, update user account, etc.)
+    
+            return response()->json(['message' => 'Payment confirmed successfully']);
+        }
+    
+        return response()->json(['message' => 'Payment confirmation failed']);
     }
+    
     
 }

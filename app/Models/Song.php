@@ -23,6 +23,6 @@ class Song extends Model
 
     public function orders()
     {
-        return $this->belongsToMany(Order::class)->withPivot('quantity');
+        return $this->hasMany(Order::class);
     }
 }
