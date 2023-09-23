@@ -87,5 +87,26 @@ class SongController extends Controller
 
         return response()->json(['client_secret' => $paymentIntent->client_secret]);
     }
+
+
+    public function confirmPayment(Request $request)
+    {
+        // ... Payment confirmation logic ...
+
+        // Create a new order record
+        $order = Order::create([
+            'user_id' => auth()->user()->id, // Assuming user is authenticated
+            'payment_intent_id' => $paymentIntentId, // Replace with actual payment intent ID
+            'total_price' => $totalPrice, // Replace with actual total price
+        ]);
+
+        // Update order status as needed
+        $order->update(['status' => 'paid']); // Example: Update order status to 'paid'
+
+        // Handle other post-payment processing...
+
+        // Return a success response
+        return response()->json(['message' => 'Payment confirmed successfully']);
+    }
     
 }

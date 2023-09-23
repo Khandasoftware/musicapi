@@ -3,10 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\SongController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\StripeWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +43,9 @@ Route::prefix('v1')->group(function () {
    // Route::any('{any}', [ ApiController::class, 'index' ] )->where('any', '.*');
 
     Route::post('/purchase/{song}', [SongController::class,'purchase'] );
-
+    Route::post('/stripe/webhook/payment-intent-succeeded', [StripeWebhookController::class, 'handlePaymentSuccess'] );
+    Route::post('/stripe/webhook/charge-succeeded', [StripeWebhookController::class, 'handleChargeSucceeded']);
+    Route::post('/stripe/webhook/subscription-created', [StripeWebhookController::class, 'handleSubscriptionCreated']);
+    Route::get('/logs', [LogController::class, 'show'] );
 });
 
