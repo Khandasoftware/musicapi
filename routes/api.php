@@ -29,13 +29,18 @@ Route::prefix('v1')->group(function () {
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
+
+        Route::group([ 'prefix' =>'admin', 'as'=>'admin.', 'middleware'=>'is_admin'], function () { 
+            Route::apiResource('songs', SongController::class);
+        });
         //Protected resource routes
-        Route::apiResource('songs', SongController::class);
+        // Route::apiResource('songs', SongController::class);
         Route::apiResource('genres', GenreController::class);
 
         Route::post('/purchase/{song}', [SongController::class,'purchase'] );
         Route::post('/confirm', [SongController::class,'confirmPayment'] );
     });
+
 
     // Public routes
     Route::post('/register', [RegisterController::class,'register'] ); // User registration
@@ -43,8 +48,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/songs/by-genre/{genre}', [SongController::class, 'getByGenre']);
 
     // Catch-all route for handling unspecified routes
-   // Route::any('{any}', [ ApiController::class, 'index' ] )->where('any', '.*');
-
+   // Route::any('{any}', [ ApiController::class, 'index' ] )->where('any', '.*'); 
     Route::get('/logs', [LogController::class, 'show'] );
+
+
 });
 
