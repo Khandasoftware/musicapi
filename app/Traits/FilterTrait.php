@@ -1,18 +1,9 @@
 <?php
-
-// app/Services/SongService.php
-
-namespace App\Services;
-
-use App\Models\Song;
-
-class SongService {
-    public function getAllSongs() {
-        return Song::all();
-    }
-
-    public function getPaginatedAndOrderedSongs($perPage, $orderColumn, $orderDirection, $user=false ) {
-        $query = Song::query();
+namespace App\Traits;
+trait FilterTrait 
+{
+    public function filter($perPage, $orderColumn, $orderDirection, $model ) {
+        $query = $model::query();
         $user = auth()->user();
         // Logic for filtering by users here
         if( $user && in_array( $user->role, [ "artist" , "producer"] ) )
@@ -32,6 +23,4 @@ class SongService {
 
         return $query->paginate($perPage);
     }
-
-    // Other methods related to songs can be added here
 }

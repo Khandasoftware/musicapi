@@ -9,6 +9,7 @@ use Stripe\PaymentIntent;
 use Illuminate\Http\Request;
 use App\Services\SongService;
 use App\Http\Controllers\Controller;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class SongController extends Controller
 {
@@ -23,7 +24,7 @@ class SongController extends Controller
         $perPage = request()->input('per_page', 10);
         $orderColumn = request()->input('order_column', 'title'); // Default order column is 'title'
         $orderDirection = request()->input('order_direction', 'asc'); // Default order direction is 'asc'
-        
+         //user access check
         try {
             $songs = $this->songService->getPaginatedAndOrderedSongs(
                 $perPage,
@@ -38,26 +39,84 @@ class SongController extends Controller
     
     public function store(Request $request)
     {
-        $song = Song::create($request->all());
+        $user = auth()->user();
+        $song = new Song($request->all());
+        //user access check
+        try {
+            $this->authorize('create', $song );
+        } catch (AuthorizationException $e) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+       
+        $song->user_id = $user->id;
+        $song->save();
+        // Sync the genres
         $song->genres()->sync($request->input('genres'));
         return response()->json($song, 201);
     }
     
+    
     public function show(Song $song)
     {
-        return $song;
+         //user access check
+        try {
+            $this->authorize('view', $song );
+        } catch (AuthorizationException $e) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        
+        return response()->json( $song, 200);
+
     }
     
     public function update(Request $request, Song $song)
     {
+        //user access check
+        try {
+            $this->authorize('update', $song);
+        } catch (AuthorizationException $e) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $song->update($request->all());
         $song->genres()->sync($request->input('genres'));
         return response()->json($song, 200);
     }
     
+    public function restore(Song $song)
+    {
+        //user access check
+        try {
+            $this->authorize('restore', $song);
+        } catch (AuthorizationException $e) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+    
+        // Restore the song (set deleted_at to null).
+        $song->restore();
+
+        return response()->json($song, 200);
+    }
     public function destroy(Song $song)
     {
+        try {
+            $this->authorize('delete', $song);
+        } catch (AuthorizationException $e) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
         $song->delete();
+        return response()->json(null, 204);
+    }
+
+    public function destroyPermanant(Song $song)
+    {
+         //user access check
+        try {
+            $this->authorize('forceDelete', $song);
+        } catch (AuthorizationException $e) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        $song->forceDelete();
         return response()->json(null, 204);
     }
 
@@ -70,8 +129,6 @@ class SongController extends Controller
     
         return response()->json(['songs' => $songs]);
     }
-
-
 
     public function purchase(Request $request, Song $song)
     {

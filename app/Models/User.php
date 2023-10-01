@@ -21,7 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'is_admin'
+        'role'
     ];
 
     /**
@@ -47,5 +47,25 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+    public function isArtist()
+    {
+        return $this->role === 'artist';
+    }
+    public function isProducer()
+    {
+        return $this->role === 'producer';
+    }
+    public function songs()
+    {
+        return $this->hasMany(Song::class);
+    }
+    public function genres()
+    {
+        return $this->hasMany(Genre::class);
     }
 }

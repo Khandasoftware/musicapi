@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('songs', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             //
-            $table->string('price');
+            $table->string("role");
         });
     }
 
@@ -22,9 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('songs', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             //
-            $table->dropColumn(['price']);
+            $table->dropColumn(['role']);
         });
     }
 };

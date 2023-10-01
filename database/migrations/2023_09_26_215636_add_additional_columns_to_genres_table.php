@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('genres', function (Blueprint $table) {
             //
-            $table->boolean('is_admin')->default(false);
+            $table->unsignedBigInteger('user_id');
         });
     }
 
@@ -22,8 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('genres', function (Blueprint $table) {
             //
+            $table->dropColumn(['user_id']);
         });
     }
 };
