@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Stripe\Stripe;
 use App\Models\Song;
 use App\Models\Order;
+use App\Models\License;
 use Stripe\PaymentIntent;
 use Illuminate\Http\Request;
 use App\Services\SongService;
@@ -49,13 +50,21 @@ class SongController extends Controller
         }
        
         $song->user_id = $user->id;
-        $song->save();
+
         // Sync the genres
         $song->genres()->sync($request->input('genres'));
+
+        // Associate the song with a license using sync
+        $licenseId = $request->input('license_id');
+        $license = License::find($licenseId);
+        $song->license()->associate($license);
+       
+        //finally save the song
+        $song->save();
+        
         return response()->json($song, 201);
     }
-    
-    
+     
     public function show(Song $song)
     {
          //user access check
@@ -130,6 +139,16 @@ class SongController extends Controller
         return response()->json(['songs' => $songs]);
     }
 
+    public function songsByLicense($licenseId)
+    {
+        // Retrieve songs for the specified license
+        $songs = Song::whereHas('license', function ($query) use ($licenseId) {
+            $query->where('license_id', $licenseId);
+        })->get();
+    
+        return response()->json(['songs' => $songs]);
+    }
+    
     public function purchase(Request $request, Song $song)
     {
 
