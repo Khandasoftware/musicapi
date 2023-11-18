@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Services\SongService;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Storage;
 
 class SongController extends Controller
 {
@@ -41,6 +42,7 @@ class SongController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
+        
         $song = new Song($request->all());
         //user access check
         try {
@@ -49,6 +51,15 @@ class SongController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
        
+        $request->validate([
+            'title' => 'required|string',
+            'description' => 'nullable|string',
+            'artist' => 'required|string',
+            'audio' => 'required|file|mimes:application/octet-stream,audio/mpeg,mpga,mp3|max:15000', // Max size in kilobytes (15 megabytes)
+            'cover_image' => 'nullable|image|max:2000', // Max size in kilobytes (2 megabytes)
+            'price' => 'required|numeric',
+        ]);
+
         $song->user_id = $user->id;
 
         // Sync the genres
@@ -58,7 +69,21 @@ class SongController extends Controller
         $licenseId = $request->input('license_id');
         $license = License::find($licenseId);
         $song->license()->associate($license);
-       
+
+        // Upload image
+        if( !empty( $request->cover_image ) ){
+            $coverImage = $this->sanitizeFileName($request->cover_image->getClientOriginalName()).'-'.time().'.' . $request->cover_image->extension();
+            $request->cover_image->move(public_path('images'), $coverImage);
+            $song->cover_image = $coverImage;
+        }
+
+        // Upload audio file
+        $audio = $request->audio;
+        $originalAudioFileName = $this->sanitizeFileName(pathinfo( $audio->getClientOriginalName(), PATHINFO_FILENAME) );
+        $audioFileName =  $originalAudioFileName.'-'.time().'.'. $audio->getClientOriginalExtension();
+        $audio->move(public_path('audio'), $audioFileName);
+        $song->audio = $audioFileName;
+
         //finally save the song
         $song->save();
         
@@ -200,5 +225,9 @@ class SongController extends Controller
         return response()->json(['message' => 'Payment confirmation failed']);
     }
     
-    
+    private function sanitizeFileName($fileName)
+    {
+        return preg_replace('/[^\w]/', '-', $fileName);
+    }
+     
 }

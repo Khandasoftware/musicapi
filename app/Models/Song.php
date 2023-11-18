@@ -10,7 +10,7 @@ class Song extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'artist', 'mp3', 'cover_image','price'];
+    protected $fillable = ['title', 'description', 'artist', 'audio', 'cover_image','price'];
 
     public function genres()
     {
